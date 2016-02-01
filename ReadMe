@@ -1,0 +1,4 @@
+1. Describe DB in metadata/PDBSchema.py
+2. Configure path and file in metadata/PDBDef.py
+3. Generate DB scripts:
+      python PDBHandler.py
