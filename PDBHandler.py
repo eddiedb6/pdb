@@ -113,12 +113,12 @@ dbBackupFilePath = os.path.join(dbBackupDir, "$2_$(date +'%Y%m%d').bak")
 backupCommand = PDBDef.pdbCmdMysqldump + " -u $1 -p $2 > " + dbBackupFilePath
 dbBackupShell.write(backupCommand + "\n")
 dbBackupShell.write("echo \"" + backupCommand + "\"\n");
-dbBackupShell.write("sudo 7z a -p$3 " +
+dbBackupShell.write("7z a -p$3 " +
                     dbBackupFilePath.replace(".bak", ".7z") +
                     " " +
                     dbBackupFilePath +
                     "\n")
-dbBackupShell.write("sudo rm -rf " + dbBackupFilePath + "\n")
+dbBackupShell.write("rm -rf " + dbBackupFilePath + "\n")
 
 dbBackupShell.close()
 
@@ -131,7 +131,7 @@ dbRestoreShell.write("# Usage: sh " + dbRestoreShellPath + " DB_USERNAME DB_NAME
 dbRestoreShell.write("if test $# -lt 3\n")
 dbRestoreShell.write("then\n")
 dbRestoreShell.write("    echo \"" +
-                     PDBDef.pdbFileBackupDBShell +
+                     PDBDef.pdbFileRestoreDBShell +
                      " DB_USERNAME DB_NAME BAK_FILE_NAME\"\n")
 dbRestoreShell.write("    exit\n")
 dbRestoreShell.write("fi\n")
@@ -140,9 +140,9 @@ dbBackupDir = os.path.join(PDBDef.pdbDirBase,
 dbRestoreFilePath = os.path.join(dbBackupDir, "$3")
 dbRestoreShell.write("dbBakFile=`echo " + dbRestoreFilePath + " | sed -e 's/.7z/.bak/'`\n")
 dbRestoreShell.write("cd " + dbBackupDir + "\n")
-dbRestoreShell.write("sudo 7z e " + dbRestoreFilePath + "\n")
+dbRestoreShell.write("7z e " + dbRestoreFilePath + "\n")
 restoreCommand = PDBDef.pdbCmdMysql + " -u $1 -p $2 < $dbBakFile"
 dbRestoreShell.write(restoreCommand + "\n")
 dbRestoreShell.write("echo \"" + restoreCommand + "\"\n");
-dbRestoreShell.write("sudo rm -rf $dbBakFile\n")
+dbRestoreShell.write("rm -rf $dbBakFile\n")
 dbRestoreShell.close()
