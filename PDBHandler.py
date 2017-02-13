@@ -1,18 +1,30 @@
 import os
+import sys
 import datetime
 
 import PDBConst
 
-from metadata import PDBSchema
 from metadata import PDBDef
+
+sys.path.append(PDBDef.schemaBase)
+from SchemaChecker import *
+
+# Check config schema first
+schemaPath = os.path.join(PDBDef.pdbDirBase, "PDBConfigSchema.py")
+pdbConfigPath = os.path.join(PDBDef.pdbDirBase, "metadata/PDBSchema.py")
+constPath = os.path.join(PDBDef.pdbDirBase, "PDBConst.py")
+configChecker = SchemaChecker(pdbConfigPath, schemaPath, constPath)
+configCheckResult, schema = configChecker.Check()
+if not configCheckResult:
+    exit("PDB schema check error!")
 
 # Generate DB drop script
 dbDropScriptPath = os.path.join(PDBDef.pdbDirBase,
                                 PDBConst.pdbDirGenerated,
                                 PDBDef.pdbFileDropDB)
 dbDropScript = open(dbDropScriptPath, "w")
-for dbName in PDBSchema.pdbDB.keys():
-    dbDropScript.write("drop database " + dbName + ";\n")
+for db in schema:
+    dbDropScript.write("drop database " + db[PDBConst.Name] + ";\n")
 dbDropScript.close()
 
 #
@@ -25,37 +37,37 @@ dbInitScriptPath = os.path.join(PDBDef.pdbDirBase,
 dbInitScript = open(dbInitScriptPath, "w")
 
 # First create DB
-for dbName in PDBSchema.pdbDB.keys():
-    dbInitScript.write("## Create Database " + dbName + " ##\n")
-    dbInitScript.write("create database " + dbName + ";\n")
+for db in schema:
+    dbInitScript.write("## Create Database " + db[PDBConst.Name] + " ##\n")
+    dbInitScript.write("create database " + db[PDBConst.Name] + ";\n")
     dbInitScript.write("\n")
-    dbInitScript.write("use " + dbName + ";\n")
+    dbInitScript.write("use " + db[PDBConst.Name] + ";\n")
     
     # Then create table 
-    for tableName in PDBSchema.pdbDB[dbName].keys():
-        dbInitScript.write("## Create Table " + tableName + " ##\n")
-        dbInitScript.write("create table " + tableName + " (\n")
+    for table in db[PDBConst.Tables]:
+        dbInitScript.write("## Create Table " + table[PDBConst.Name] + " ##\n")
+        dbInitScript.write("create table " + table[PDBConst.Name] + " (\n")
 
         # Handle "PRIMARY KEY" first
         primaryKeys = None
-        if "PRIMARY KEY" in PDBSchema.pdbDB[dbName][tableName][PDBConst.pdbSchema].keys():
-            primaryKeys = PDBSchema.pdbDB[dbName][tableName][PDBConst.pdbSchema]["PRIMARY KEY"]
-            del PDBSchema.pdbDB[dbName][tableName][PDBConst.pdbSchema]["PRIMARY KEY"]
+        if PDBConst.PrimaryKey in table:
+            primaryKeys = table[PDBConst.PrimaryKey]
+            del table[PDBConst.PrimaryKey]
         
         # Add column description
-        index = len(PDBSchema.pdbDB[dbName][tableName][PDBConst.pdbSchema])
-        for column in PDBSchema.pdbDB[dbName][tableName][PDBConst.pdbSchema].keys():
+        index = len(table[PDBConst.Columns])
+        for column in table[PDBConst.Columns]:
             index = index - 1
-            if len(PDBSchema.pdbDB[dbName][tableName][PDBConst.pdbSchema][column]) > 1:
+            if len(column[PDBConst.Attributes]) > 1:
                 dbInitScript.write("    " +
-                                   column +
+                                   column[PDBConst.Name] +
                                    " " +
-                                   " ".join(PDBSchema.pdbDB[dbName][tableName][PDBConst.pdbSchema][column]))
+                                   " ".join(column[PDBConst.Attributes]))
             else:
                 dbInitScript.write("    " +
-                                   column +
+                                   column[PDBConst.Name] +
                                    " " +
-                                   PDBSchema.pdbDB[dbName][tableName][PDBConst.pdbSchema][column][0])
+                                   column[PDBConst.Attributes][0])
             if index == 0:
                 if primaryKeys is not None:
                     dbInitScript.write(",\n")
@@ -65,12 +77,17 @@ for dbName in PDBSchema.pdbDB.keys():
                 dbInitScript.write(",\n")
 
         # Insert initial values
-        if not  PDBSchema.pdbDB[dbName][tableName].has_key(PDBConst.pdbValues):
+        if PDBConst.Initials not in table:
             continue
-        for row in  PDBSchema.pdbDB[dbName][tableName][PDBConst.pdbValues]:
-            columns = ", ".join(row.keys())
-            value = ", ".join(row.values())
-            dbInitScript.write("insert into " + tableName + " (" + columns + ") values (" + value + ");\n")
+        for row in  table[PDBConst.Initials]:
+            columnNames = []
+            columnValues = []
+            for rowValue in row:
+                columnNames.append(rowValue[PDBConst.Name])
+                columnValues.append(rowValue[PDBConst.Value])
+            columns = ", ".join(columnNames)
+            value = ", ".join(columnValues)
+            dbInitScript.write("insert into " + table[PDBConst.Name] + " (" + columns + ") values (" + value + ");\n")
                                
         dbInitScript.write("\n")
     dbInitScript.write("\n")                               

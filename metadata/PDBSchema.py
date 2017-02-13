@@ -1,23 +1,43 @@
-import sys
-sys.path.append("..")
-import PDBConst
-
-pdbDB = {
     #############################################
     # User DB description should be added below #
     #############################################
 
     # e.g. #
-    "ej": { # DB name
-        "config": { # Table name
-            PDBConst.pdbSchema: { # Table description
-                "Name": ["varchar(128)", "not null", "primary key"],
-                "Value": ["varchar(128)"]
+    {
+        PDBConst.Name: "ej",
+        PDBConst.Tables: [
+        {
+            PDBConst.Name: "config",
+            PDBConst.Columns: [
+            {
+                PDBConst.Name: "Name",
+                PDBConst.Attributes: [
+                    "varchar(128)",
+                    "not null",
+                    "primary key"
+                ]
             },
-            PDBConst.pdbValues: [ # Table initial values if needed
-                {"Name": "'version'", "Value": "'0.1'"}
-            ]
-        }
+            {
+                PDBConst.Name: "Value",
+                PDBConst.Attributes: [
+                    "varchar(128)"
+                ]
+            }],
+            PDBConst.PrimaryKey: [
+                "Name"
+            ],
+            PDBConst.Initials: [
+            [
+                {
+                    PDBConst.Name: "Name",
+                    PDBConst.Value: "'version'"
+                },
+                {
+                    PDBConst.Name: "Value",
+                    PDBConst.Value: "'0.1'"
+                }
+            ]]
+        }]
     }
     
     #############################################

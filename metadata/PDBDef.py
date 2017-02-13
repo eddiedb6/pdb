@@ -3,6 +3,7 @@
 ###################################
 
 pdbDirBase = "/home/ed/Documents/git/pdb"
+schemaBase = "/home/ed/Documents/git/schema"
 
 pdbFileInitDB = "init.mysql"
 pdbFileDropDB = "drop.mysql"
