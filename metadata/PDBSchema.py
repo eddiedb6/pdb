@@ -1,4 +1,4 @@
-{
+[
     #############################################
     # User DB description should be added below #
     #############################################
@@ -12,36 +12,22 @@
             PDBConst.Columns: [
             {
                 PDBConst.Name: "Name",
-                PDBConst.Attributes: [
-                    "varchar(128)",
-                    "not null",
-                    "primary key"
-                ]
+                PDBConst.Attributes: ["varchar(128)", "not null", "primary key"]
             },
             {
                 PDBConst.Name: "Value",
-                PDBConst.Attributes: [
-                    "varchar(128)"
-                ]
+                PDBConst.Attributes: ["varchar(128)"]
             }],
-            PDBConst.PrimaryKey: [
-                "Name"
-            ],
-            PDBConst.Initials: [
-            [
-                {
-                    PDBConst.Name: "Name",
-                    PDBConst.Value: "'version'"
-                },
-                {
-                    PDBConst.Name: "Value",
-                    PDBConst.Value: "'0.1'"
-                }
-            ]]
+            PDBConst.PrimaryKey: ["Name"],
+            PDBConst.Initials: {
+                SchemaIgnoreSchema: [
+                    {"Name": "'version'", "Value": "'0.1'"}
+                ]
+            }
         }]
     }
     
     #############################################
     # User DB description should be added above #
     #############################################
-}
+]

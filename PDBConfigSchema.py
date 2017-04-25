@@ -42,22 +42,7 @@
         SchemaType: SchemaTypeArray
     },
     PDBConst.Initials: {
-        SchemaType: SchemaTypeArray,
-        SchemaRule: [
-            CheckForeachAsType(PDBConst.Initial)
-        ]
-    },
-    PDBConst.Initial: {
-        SchemaType: SchemaTypeArray,
-        SchemaRule: [
-            CheckForeachAsType(PDBConst.InitialValue)
-        ]
-    },
-    PDBConst.InitialValue: {
-        SchemaType: SchemaTypeDict,
-        SchemaRule: [
-            HasKey(PDBConst.Name, PDBConst.Value)
-        ]
+        SchemaType: SchemaTypeDict
     },
     PDBConst.Value: {
         SchemaType: SchemaTypeString

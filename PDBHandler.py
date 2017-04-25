@@ -8,6 +8,7 @@ from metadata import PDBDef
 
 sys.path.append(PDBDef.schemaBase)
 from SchemaChecker import *
+from SchemaConst import *
 
 # Check config schema first
 schemaPath = os.path.join(PDBDef.pdbDirBase, "PDBConfigSchema.py")
@@ -40,8 +41,8 @@ dbInitScript = open(dbInitScriptPath, "w")
 for db in schema:
     dbInitScript.write("## Create Database " + db[PDBConst.Name] + " ##\n")
     dbInitScript.write("create database " + db[PDBConst.Name] + ";\n")
-    dbInitScript.write("\n")
     dbInitScript.write("use " + db[PDBConst.Name] + ";\n")
+    dbInitScript.write("\n")
     
     # Then create table 
     for table in db[PDBConst.Tables]:
@@ -79,14 +80,11 @@ for db in schema:
         # Insert initial values
         if PDBConst.Initials not in table:
             continue
-        for row in  table[PDBConst.Initials]:
-            columnNames = []
-            columnValues = []
-            for rowValue in row:
-                columnNames.append(rowValue[PDBConst.Name])
-                columnValues.append(rowValue[PDBConst.Value])
-            columns = ", ".join(columnNames)
-            value = ", ".join(columnValues)
+        if SchemaIgnoreSchema not in table[PDBConst.Initials]:
+            continue
+        for row in  table[PDBConst.Initials][SchemaIgnoreSchema]:
+            columns = ", ".join(row.keys())
+            value = ", ".join(row.values())
             dbInitScript.write("insert into " + table[PDBConst.Name] + " (" + columns + ") values (" + value + ");\n")
                                
         dbInitScript.write("\n")
