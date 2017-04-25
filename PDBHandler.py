@@ -3,26 +3,23 @@ import sys
 import datetime
 
 import PDBConst
+from metadata import PDBConfig
+from schema import SchemaChecker
+from schema import SchemaConst
 
-from metadata import PDBDef
+pdbDirBase = os.path.split(os.path.realpath(__file__))[0]
 
-sys.path.append(PDBDef.schemaBase)
-from SchemaChecker import *
-from SchemaConst import *
-
-# Check config schema first
-schemaPath = os.path.join(PDBDef.pdbDirBase, "PDBConfigSchema.py")
-pdbConfigPath = os.path.join(PDBDef.pdbDirBase, "metadata/PDBSchema.py")
-constPath = os.path.join(PDBDef.pdbDirBase, "PDBConst.py")
-configChecker = SchemaChecker(pdbConfigPath, schemaPath, constPath)
+# Check database definition schema first
+schemaPath = os.path.join(pdbDirBase, "PDBSchema.py")
+dbDefinitionPath = PDBConfig.pdbDefinitionPath
+constPath = os.path.join(pdbDirBase, "PDBConst.py")
+configChecker = SchemaChecker.SchemaChecker(dbDefinitionPath, schemaPath, constPath)
 configCheckResult, schema = configChecker.Check()
 if not configCheckResult:
     exit("PDB schema check error!")
 
 # Generate DB drop script
-dbDropScriptPath = os.path.join(PDBDef.pdbDirBase,
-                                PDBConst.pdbDirGenerated,
-                                PDBDef.pdbFileDropDB)
+dbDropScriptPath = os.path.join(PDBConfig.pdbDirGenerated, PDBConfig.pdbFileDropDB)
 dbDropScript = open(dbDropScriptPath, "w")
 for db in schema:
     dbDropScript.write("drop database " + db[PDBConst.Name] + ";\n")
@@ -32,9 +29,7 @@ dbDropScript.close()
 # Generate DB init script
 #
 
-dbInitScriptPath = os.path.join(PDBDef.pdbDirBase,
-                                PDBConst.pdbDirGenerated,
-                                PDBDef.pdbFileInitDB)
+dbInitScriptPath = os.path.join(PDBConfig.pdbDirGenerated, PDBConfig.pdbFileInitDB)
 dbInitScript = open(dbInitScriptPath, "w")
 
 # First create DB
@@ -80,9 +75,9 @@ for db in schema:
         # Insert initial values
         if PDBConst.Initials not in table:
             continue
-        if SchemaIgnoreSchema not in table[PDBConst.Initials]:
+        if SchemaConst.SchemaIgnoreSchema not in table[PDBConst.Initials]:
             continue
-        for row in  table[PDBConst.Initials][SchemaIgnoreSchema]:
+        for row in  table[PDBConst.Initials][SchemaConst.SchemaIgnoreSchema]:
             columns = ", ".join(row.keys())
             value = ", ".join(row.values())
             dbInitScript.write("insert into " + table[PDBConst.Name] + " (" + columns + ") values (" + value + ");\n")
@@ -93,39 +88,33 @@ for db in schema:
 dbInitScript.close()
 
 # Generate init shell script for MySQL
-dbInitShellPath = os.path.join(PDBDef.pdbDirBase,
-                               PDBConst.pdbDirGenerated,
-                               PDBDef.pdbFileInitDBShell)
+dbInitShellPath = os.path.join(PDBConfig.pdbDirGenerated, PDBConfig.pdbFileInitDBShell)
 dbInitShell = open(dbInitShellPath, "w")
 dbInitShell.write("# Usage: sh " + dbInitShellPath + " DB_USERNAME\n")
 dbInitShell.write("if test $# -lt 1\n")
 dbInitShell.write("then\n")
-dbInitShell.write("    echo \"sh " + PDBDef.pdbFileInitDBShell + " DB_USERNAME\"\n")
+dbInitShell.write("    echo \"sh " + PDBConfig.pdbFileInitDBShell + " DB_USERNAME\"\n")
 dbInitShell.write("    exit\n")
 dbInitShell.write("fi\n")
-dropCommand = PDBDef.pdbCmdMysql + " -u $1 -p < " + dbDropScriptPath
+dropCommand = PDBConfig.pdbCmdMysql + " -u $1 -p < " + dbDropScriptPath
 dbInitShell.write(dropCommand + "\n")
 dbInitShell.write("echo \"" + dropCommand + "\"\n");
-initCommand = PDBDef.pdbCmdMysql + " -u $1 -p < " + dbInitScriptPath
+initCommand = PDBConfig.pdbCmdMysql + " -u $1 -p < " + dbInitScriptPath
 dbInitShell.write(initCommand + "\n")
 dbInitShell.write("echo \"" + initCommand + "\"\n")
 dbInitShell.close()
 
 # Generate DB backup shell script
-dbBackupShellPath = os.path.join(PDBDef.pdbDirBase,
-                                 PDBConst.pdbDirGenerated,
-                                 PDBDef.pdbFileBackupDBShell)
+dbBackupShellPath = os.path.join(PDBConfig.pdbDirGenerated, PDBConfig.pdbFileBackupDBShell)
 dbBackupShell = open(dbBackupShellPath, "w")
 dbBackupShell.write("# Usage: sh " + dbBackupShellPath + " DB_USERNAME DB_NAME PW\n")
 dbBackupShell.write("if test $# -lt 3\n")
 dbBackupShell.write("then\n")
-dbBackupShell.write("    echo \"" + PDBDef.pdbFileBackupDBShell + " DB_USERNAME DB_NAME PW\"\n")
+dbBackupShell.write("    echo \"" + PDBConfig.pdbFileBackupDBShell + " DB_USERNAME DB_NAME PW\"\n")
 dbBackupShell.write("    exit\n")
 dbBackupShell.write("fi\n")
-dbBackupDir = os.path.join(PDBDef.pdbDirBase,
-                           PDBConst.pdbDirBackup)
-dbBackupFilePath = os.path.join(dbBackupDir, "$2_$(date +'%Y%m%d').bak")
-backupCommand = PDBDef.pdbCmdMysqldump + " -u $1 -p $2 > " + dbBackupFilePath
+dbBackupFilePath = os.path.join(PDBConfig.pdbDirBackup, "$2_$(date +'%Y%m%d').bak")
+backupCommand = PDBConfig.pdbCmdMysqldump + " -u $1 -p $2 > " + dbBackupFilePath
 dbBackupShell.write(backupCommand + "\n")
 dbBackupShell.write("echo \"" + backupCommand + "\"\n");
 dbBackupShell.write("7z a -p$3 " +
@@ -134,29 +123,24 @@ dbBackupShell.write("7z a -p$3 " +
                     dbBackupFilePath +
                     "\n")
 dbBackupShell.write("rm -rf " + dbBackupFilePath + "\n")
-
 dbBackupShell.close()
 
 # Generate DB restore shell script
-dbRestoreShellPath = os.path.join(PDBDef.pdbDirBase,
-                                  PDBConst.pdbDirGenerated,
-                                  PDBDef.pdbFileRestoreDBShell)
+dbRestoreShellPath = os.path.join(PDBConfig.pdbDirGenerated, PDBConfig.pdbFileRestoreDBShell)
 dbRestoreShell = open(dbRestoreShellPath, "w")
 dbRestoreShell.write("# Usage: sh " + dbRestoreShellPath + " DB_USERNAME DB_NAME BAK_FILE_NAME\n")
 dbRestoreShell.write("if test $# -lt 3\n")
 dbRestoreShell.write("then\n")
 dbRestoreShell.write("    echo \"" +
-                     PDBDef.pdbFileRestoreDBShell +
+                     PDBConfig.pdbFileRestoreDBShell +
                      " DB_USERNAME DB_NAME BAK_FILE_NAME\"\n")
 dbRestoreShell.write("    exit\n")
 dbRestoreShell.write("fi\n")
-dbBackupDir = os.path.join(PDBDef.pdbDirBase,
-                           PDBConst.pdbDirBackup)
-dbRestoreFilePath = os.path.join(dbBackupDir, "$3")
+dbRestoreFilePath = os.path.join(PDBConfig.pdbDirBackup, "$3")
 dbRestoreShell.write("dbBakFile=`echo " + dbRestoreFilePath + " | sed -e 's/.7z/.bak/'`\n")
-dbRestoreShell.write("cd " + dbBackupDir + "\n")
+dbRestoreShell.write("cd " + PDBConfig.pdbDirBackup + "\n")
 dbRestoreShell.write("7z e " + dbRestoreFilePath + "\n")
-restoreCommand = PDBDef.pdbCmdMysql + " -u $1 -p $2 < $dbBakFile"
+restoreCommand = PDBConfig.pdbCmdMysql + " -u $1 -p $2 < $dbBakFile"
 dbRestoreShell.write(restoreCommand + "\n")
 dbRestoreShell.write("echo \"" + restoreCommand + "\"\n");
 dbRestoreShell.write("rm -rf $dbBakFile\n")

@@ -11,7 +11,3 @@ Initial = "initial"
 InitialValue = "initialvalue"
 Value = "value"
 PrimaryKey = "primarykey"
-
-# directory
-pdbDirBackup = "bak"
-pdbDirGenerated = "generated"
