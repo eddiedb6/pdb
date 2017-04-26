@@ -12,7 +12,7 @@ pdbFileInitDBShell = "init.sh"
 pdbFileBackupDBShell = "backup.sh"
 pdbFileRestoreDBShell = "restore.sh"
 
-pdbDefinitionPath = "/home/ed/Documents/git/pdb/example/dbDefinition.py"
+pdbDefinitionPath = "/home/ed/Documents/git/pdb/example/DBDefinition.py"
 
 pdbDirGenerated = "/home/ed/Documents/git/pdb/example/generated"
 pdbDirBackup = "/home/ed/Documents/git/pdb/example/bak"
