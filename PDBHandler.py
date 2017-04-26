@@ -5,7 +5,6 @@ import datetime
 import PDBConst
 from metadata import PDBConfig
 from schema import SchemaChecker
-from schema import SchemaConst
 
 pdbDirBase = os.path.split(os.path.realpath(__file__))[0]
 
@@ -75,9 +74,7 @@ for db in schema:
         # Insert initial values
         if PDBConst.Initials not in table:
             continue
-        if SchemaConst.SchemaIgnoreSchema not in table[PDBConst.Initials]:
-            continue
-        for row in  table[PDBConst.Initials][SchemaConst.SchemaIgnoreSchema]:
+        for row in  table[PDBConst.Initials]:
             columns = ", ".join(row.keys())
             value = ", ".join(row.values())
             dbInitScript.write("insert into " + table[PDBConst.Name] + " (" + columns + ") values (" + value + ");\n")

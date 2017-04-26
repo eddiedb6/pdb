@@ -19,11 +19,9 @@
                 PDBConst.Attributes: ["varchar(128)"]
             }],
             PDBConst.PrimaryKey: ["Name"],
-            PDBConst.Initials: {
-                SchemaIgnoreSchema: [
-                    {"Name": "'version'", "Value": "'0.1'"}
-                ]
-            }
+            PDBConst.Initials: [
+                {"Name": "'version'", "Value": "'0.1'"}
+            ]
         }]
     }
     

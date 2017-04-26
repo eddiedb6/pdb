@@ -42,7 +42,7 @@
         SchemaType: SchemaTypeArray
     },
     PDBConst.Initials: {
-        SchemaType: SchemaTypeDict
+        SchemaType: SchemaTypeArray,
     },
     PDBConst.Value: {
         SchemaType: SchemaTypeString
