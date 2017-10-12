@@ -2,6 +2,8 @@ import os
 import sys
 import datetime
 
+sys.path.append(os.path.join(os.path.split(os.path.realpath(__file__))[0], "schema"))
+
 import PDBConst
 from metadata import PDBConfig
 from schema import SchemaChecker
