@@ -116,7 +116,7 @@ dbBackupFilePath = os.path.join(PDBConfig.pdbDirBackup, "$2_$(date +'%Y%m%d').ba
 backupCommand = PDBConfig.pdbCmdMysqldump + " -u $1 -p $2 > " + dbBackupFilePath
 dbBackupShell.write(backupCommand + "\n")
 dbBackupShell.write("echo \"" + backupCommand + "\"\n");
-dbBackupShell.write("7z a -p$3 " +
+dbBackupShell.write(PDBConfig.pdbCmd7z + " a -p$3 " +
                     dbBackupFilePath.replace(".bak", ".7z") +
                     " " +
                     dbBackupFilePath +
@@ -138,7 +138,7 @@ dbRestoreShell.write("fi\n")
 dbRestoreFilePath = os.path.join(PDBConfig.pdbDirBackup, "$3")
 dbRestoreShell.write("dbBakFile=`echo " + dbRestoreFilePath + " | sed -e 's/.7z/.bak/'`\n")
 dbRestoreShell.write("cd " + PDBConfig.pdbDirBackup + "\n")
-dbRestoreShell.write("7z e " + dbRestoreFilePath + "\n")
+dbRestoreShell.write(PDBConfig.pdbCmd7z + " e " + dbRestoreFilePath + "\n")
 restoreCommand = PDBConfig.pdbCmdMysql + " -u $1 -p $2 < $dbBakFile"
 dbRestoreShell.write(restoreCommand + "\n")
 dbRestoreShell.write("echo \"" + restoreCommand + "\"\n");

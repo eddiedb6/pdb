@@ -5,6 +5,8 @@
 pdbCmdMysql = "/usr/local/mysql/bin/mysql"
 pdbCmdMysqldump = "/usr/local/mysql/bin/mysqldump"
 
+pdbCmd7z = "/usr/bin/7z"
+
 pdbFileInitDB = "init.mysql"
 pdbFileDropDB = "drop.mysql"
 
